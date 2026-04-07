@@ -1,74 +1,196 @@
-# LLM J-Curves
+# Worker Job Security Index (WJSI)
 
-**An interactive simulator for the horizontal economics of frontier AI model companies.**
+A composite annual index measuring **structural job security** for American workers — independent of headline unemployment statistics.
 
-Live demo: [amiasmg.github.io/llm-jcurves](https://amiasmg.github.io/llm-jcurves)
-
----
-
-## What is this?
-
-Frontier AI companies like OpenAI and Anthropic are losing billions of dollars per year while trading at extraordinary valuations. Most people look at their income statements and see disaster. This tool helps you look at the right thing instead: the **horizontal economics** of each model generation.
-
-The analogy comes from credit cards. A credit card company looks deeply unprofitable when it's growing fast — because every new account requires upfront acquisition cost and a loss provision. But each individual account, properly underwritten, is a highly profitable long-term investment. The vertical economics show a loss. The horizontal economics show a franchise.
-
-LLM companies work the same way. Each model generation requires a large upfront training investment, followed by an inference revenue stream over the model's commercial lifespan. The question is not whether they're losing money. Of course they are. The question is whether each model generation earns back more than it costs — and whether the business compounds fast enough to fund the next generation without perpetual external capital.
-
-This simulator — a "toy model" built to develop intuition, not produce precise forecasts — lets you adjust the key variables and watch the J-curve shape of each model generation's cumulative P&L.
+Built in collaboration with [LISEP](https://lisep.org) (Ludwig Institute for Shared Economic Prosperity).
 
 ---
 
-## The Four Key Variables
+## The Problem
 
-| Variable | Description | Current Ballpark |
+Headline unemployment (U-3) has been at or below 4% since 2022 — a level historically associated with a strong labour market. Yet over the same period:
+
+- The voluntary quit rate fell 25% (from 2.76% to 2.07%)
+- Union membership hit a post-war low of 9.9%
+- Median job tenure began declining
+
+Workers were **employed**, but increasingly **stuck rather than secure**. The WJSI is designed to capture that distinction.
+
+---
+
+## Index Construction
+
+### Components (headline, 5-component)
+
+| Component | Source | Direction | Rationale |
+|---|---|---|---|
+| Union membership rate | BLS CPS | ↑ = more secure | Collective bargaining power |
+| Job openings rate (JOLTS) | BLS JOLTS | ↓ = more secure | High churn signal, not stability |
+| Voluntary quit rate (JOLTS) | BLS JOLTS | ↑ = more secure | Worker confidence / outside options |
+| Layoffs & discharges rate (JOLTS) | BLS JOLTS | ↓ = more secure | Involuntary job loss |
+| Median job tenure | BLS ETS | ↑ = more secure | Structural employment stability |
+
+Each component is **z-score normalised** over the full available sample, directionally aligned so higher = more secure, then averaged into a composite. The composite is shifted to a positive range and expressed as an index (base year 2005 = 100).
+
+### Why not U-6 or part-time for economic reasons?
+Including involuntary part-time work created r = 0.81 with U-6 (because U-6 literally contains that subcomponent). Dropping it reduced U-6 correlation to r = 0.15 — making the index structurally differentiated rather than a repackaging of existing measures.
+
+### Data coverage
+- **JOLTS era (headline):** 2001–present, annual
+- **Legacy series:** 1983–2000 (union + tenure only, 2-component)
+- **Monthly variant:** JOLTS-only composite (openings + quits + layoffs), 2001–present
+
+---
+
+## Key Findings
+
+### WJSI leads Michigan Consumer Sentiment by ~2 years
+
+| Lag | Headline r | p-value |
 |---|---|---|
-| **Inference margin** | Revenue retained after cost of serving outputs | 40–60% |
-| **Model dominance window** | Months a model holds frontier position before being displaced | 6–18 months |
-| **Revenue growth rate** | Annual pace of revenue growth during a model's reign | 80–200%+ |
-| **Training cost multiplier** | How much more expensive each successive model is to train | 3–5x per generation |
+| Concurrent | +0.15 | 0.47 |
+| Index leads by 1yr | +0.18 | 0.40 |
+| **Index leads by 2yr** | **+0.45** | **0.033** |
+| Index leads by 3yr | +0.25 | 0.26 |
 
-The dominance window is the most underappreciated of these. Compressing it from 18 to 12 months can turn a self-funding business into one requiring a billion dollars in external capital — at the same growth rate and margin. The required growth rate scales nonlinearly: a 6-month window requires ~500% annual growth; 24 months requires only ~100–150%.
+The predictive relationship is carried by the **joint signal** of structural durability (union + tenure) and flow stability (JOLTS). Pure JOLTS-only or structural-only variants lose significance.
 
-At roughly **80% annual revenue growth**, with current margin and training cost assumptions, each generation can approximately self-fund the next. Below 70%, the math starts requiring external capital at scale. Above 100%, the business becomes a genuine compounding machine.
+### WJSI vs. headline unemployment diverge most when it matters
+Post-2022: U-3 ≤ 4% while WJSI declined from 99 to 87 — driven by quit rate collapse, union erosion, and tenure decline. Workers are employed but structurally less secure.
+
+### Index at key moments (base 2005 = 100)
+
+| Year | WJSI | Context |
+|---|---|---|
+| 2001 | 89.8 | Dot-com bust + 9/11 |
+| 2005 | 100.0 | Base year |
+| 2009 | 83.2 | GFC trough |
+| 2019 | 98.4 | Pre-COVID peak |
+| 2020 | 51.7 | COVID shock |
+| 2022 | 99.1 | Post-COVID tightening |
+| 2024 | 86.8 | Present (structural deterioration) |
 
 ---
 
-## Background
+## Variants
 
-This tool was built to accompany a research piece by [Amias Gerety](https://github.com/amiasmg) and the QED Investors team: *"The Training Treadmill: The Microeconomics of Scaling Laws and AI Adoption."*
+| Variant | Components | Frequency | Key difference |
+|---|---|---|---|
+| **Headline** | Union + openings + quits + layoffs + tenure | Annual | Primary index |
+| **Variant A** | Union + quits + layoffs + tenure (ex openings) | Annual | Tests openings sign convention |
+| **Variant B (JOLTS-MCI)** | Openings + quits + layoffs | Monthly | Real-time tightness gauge |
 
-The core insight: the analysts who will get AI right are those who can read a J-curve, not just an income statement.
+Variant B (JOLTS-only) tracks U-3 at r = −0.77 — it's measuring cyclical tightness, not structural security. The sentiment lead story disappears without the structural components.
 
 ---
 
-## Running Locally
+## Repository Structure
 
+```
+.
+├── wjsi/
+│   ├── fetch_bls.py          # BLS API v2 fetcher (6 series + tenure scraper)
+│   ├── fetch_fred.py         # FRED fetcher (sentiment, U-6, savings rate, etc.)
+│   ├── clean.py              # Annual averaging, tenure interpolation, COVID flags
+│   ├── construct.py          # Index construction, z-scoring, base-year indexing
+│   ├── backtest.py           # 5 weighting scheme sensitivity tests
+│   ├── correlations.py       # Lead/lag vs Michigan, Granger causality, permutation tests
+│   ├── variants.py           # Variant A (ex openings) + Variant B (monthly JOLTS-MCI)
+│   ├── run_all.py            # Pipeline runner
+│   ├── data/
+│   │   ├── raw/              # Raw API responses (CSV)
+│   │   └── clean/            # Processed annual series (CSV)
+│   └── outputs/
+│       ├── wjsi_annual.csv               # Primary index output
+│       ├── wjsi_legacy_1983.csv          # 1983–2000 legacy series
+│       ├── jolts_mci_monthly.csv         # Monthly JOLTS-only composite
+│       ├── wjsi_variant_a_ex_openings.csv
+│       └── charts/                       # All generated charts
+├── viz/                      # Interactive React + Recharts explorer
+│   └── src/App.jsx           # Lag slider, dual-line overlay, Pearson r badge
+├── make_memo.js              # docx-js script → WJSI_Briefing_Note.docx
+└── WJSI_Briefing_Note.docx   # 3-page briefing note for LISEP
+```
+
+---
+
+## Running the Pipeline
+
+### Requirements
+- Python 3.9+
+- `pip install pandas numpy matplotlib scipy fredapi python-dotenv requests`
+- Node 18+ (for the React explorer and memo generation)
+- BLS API key (free at [bls.gov/developers](https://www.bls.gov/developers/))
+- FRED API key (free at [fred.stlouisfed.org/docs/api](https://fred.stlouisfed.org/docs/api/api_key.html))
+
+### Setup
 ```bash
+git clone https://github.com/amiasmg/worker-job-security-index.git
+cd worker-job-security-index
+
+# Add API keys
+cp wjsi/.env.example wjsi/.env
+# Edit wjsi/.env and add your BLS_API_KEY and FRED_API_KEY
+```
+
+### Run
+```bash
+cd wjsi
+
+# Full pipeline (fetch → clean → construct → backtest → correlations)
+python run_all.py
+
+# Or step by step
+python fetch_bls.py
+python fetch_fred.py
+python clean.py
+python construct.py
+python backtest.py
+python correlations.py
+python variants.py   # Variant A and B
+```
+
+### Interactive explorer
+```bash
+cd viz
 npm install
 npm run dev
-```
-
-Requires Node.js. Built with [React](https://react.dev/) and [Vite](https://vitejs.dev/).
-
-To build for production:
-
-```bash
-npm run build
-```
-
-To deploy to GitHub Pages:
-
-```bash
-npm run deploy
+# Open http://localhost:5173
 ```
 
 ---
 
-## Caveats
+## Data Sources
 
-This is a toy model. It does not reflect the actual economics of OpenAI, Anthropic, Google, or any other company. Real numbers are messier, involve competitive dynamics, product mix, and organizational variables no spreadsheet can capture.
+| Series | Source | Series ID |
+|---|---|---|
+| Union membership rate | BLS Current Population Survey | LUU0204899600 |
+| Job openings rate | BLS JOLTS | JTS000000000000000JOR |
+| Quit rate | BLS JOLTS | JTS000000000000000QUR |
+| Layoffs & discharges rate | BLS JOLTS | JTS000000000000000LDR |
+| Median job tenure | BLS Employee Tenure Survey | (biennial, scraped) |
+| Michigan Consumer Sentiment | University of Michigan / FRED | UMCSENT |
+| U-6 underemployment | BLS / FRED | U6RATE |
+| U-3 unemployment | BLS / FRED | UNRATE |
 
-The purpose is to build intuition — to show how sensitive the self-funding thesis is to small changes in growth rate or dominance window, and to illustrate why frontier market position is worth so much. Use the sliders. Try the scenarios that worry you. Try the ones that excite you.
+---
+
+## Methodological Notes
+
+- **Openings sign convention:** Job openings are treated as a *negative* signal (high churn/instability) in the headline index. This is contested — the sensitivity analysis in `backtest.py` and `variants.py` tests both directions.
+- **Base year:** 2005 chosen so that the 2009 GFC trough is meaningfully below 100 and 2019 is near 100, preserving directional readability across cycles.
+- **COVID years (2020–2021) flagged** but not excluded — the COVID shock is a real structural event.
+- **Granger causality:** WJSI → Michigan Sentiment passes at F=7.37, p=0.014. Permutation-corrected familywise p=0.16 — relationship is present but not conclusive on short sample (n=25).
+- **Rolling window analysis:** The WJSI–sentiment lead relationship emerged post-GFC and is not present in pre-2008 data, suggesting it reflects a post-crisis structural regime.
+
+---
+
+## Status
+
+This is preliminary research. Methodological feedback welcome — particularly on:
+- Openings rate sign convention
+- Weighting scheme (equal vs. structural-block vs. factor model)
+- Extension of the legacy series pre-1983
 
 ---
 
