@@ -1,0 +1,115 @@
+
+============================================================
+BLS fetch started at 2026-04-02T16:36:11.088445
+API key present: True
+============================================================
+
+
+--- pt_econ (LNS12032194) ---
+  Fetching ['LNS12032194'] 1955-1974 ...
+  Fetching ['LNS12032194'] 1975-1994 ...
+  Fetching ['LNS12032194'] 1995-2014 ...
+  Fetching ['LNS12032194'] 2015-2025 ...
+  Saved 848 rows (0 annual averages) → data/raw/pt_econ_raw.csv
+
+--- employment_total (LNS12000000) ---
+  Fetching ['LNS12000000'] 1955-1974 ...
+  Fetching ['LNS12000000'] 1975-1994 ...
+  Fetching ['LNS12000000'] 1995-2014 ...
+  Fetching ['LNS12000000'] 2015-2025 ...
+  Saved 852 rows (0 annual averages) → data/raw/employment_total_raw.csv
+
+--- union (LUU0204899600) ---
+  Fetching ['LUU0204899600'] 1983-2002 ...
+  Fetching ['LUU0204899600'] 2003-2022 ...
+  Fetching ['LUU0204899600'] 2023-2025 ...
+  Saved 43 rows (0 annual averages) → data/raw/union_raw.csv
+
+--- jolts_openings (JTS000000000000000JOR) ---
+  Fetching ['JTS000000000000000JOR'] 2001-2020 ...
+  Fetching ['JTS000000000000000JOR'] 2021-2025 ...
+  Saved 300 rows (0 annual averages) → data/raw/jolts_openings_raw.csv
+
+--- jolts_quits (JTS000000000000000QUR) ---
+  Fetching ['JTS000000000000000QUR'] 2001-2020 ...
+  Fetching ['JTS000000000000000QUR'] 2021-2025 ...
+  Saved 300 rows (0 annual averages) → data/raw/jolts_quits_raw.csv
+
+--- jolts_layoffs (JTS000000000000000LDR) ---
+  Fetching ['JTS000000000000000LDR'] 2001-2020 ...
+  Fetching ['JTS000000000000000LDR'] 2021-2025 ...
+  Saved 300 rows (0 annual averages) → data/raw/jolts_layoffs_raw.csv
+
+--- unrate_bls (LNS14000000) ---
+  Fetching ['LNS14000000'] 1948-1967 ...
+  Fetching ['LNS14000000'] 1968-1987 ...
+  Fetching ['LNS14000000'] 1988-2007 ...
+  Fetching ['LNS14000000'] 2008-2025 ...
+  Saved 936 rows (0 annual averages) → data/raw/unrate_bls_raw.csv
+
+BLS fetch completed at 2026-04-02T16:36:26.728422
+
+--- Fetching tenure supplement data ---
+  2024: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/tenure.t01.htm  (https://www.bls.gov/news.release/tenure.t01.htm)
+  2022: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09262024.htm  (https://www.bls.gov/news.release/archives/tenure_09262024.htm)
+  2020: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09222020.htm  (https://www.bls.gov/news.release/archives/tenure_09222020.htm)
+  2018: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09202018.htm  (https://www.bls.gov/news.release/archives/tenure_09202018.htm)
+  2016: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09222016.htm  (https://www.bls.gov/news.release/archives/tenure_09222016.htm)
+  2014: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09182014.htm  (https://www.bls.gov/news.release/archives/tenure_09182014.htm)
+  2012: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09182012.htm  (https://www.bls.gov/news.release/archives/tenure_09182012.htm)
+  2010: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09142010.htm  (https://www.bls.gov/news.release/archives/tenure_09142010.htm)
+  2008: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09262008.htm  (https://www.bls.gov/news.release/archives/tenure_09262008.htm)
+  2006: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09082006.htm  (https://www.bls.gov/news.release/archives/tenure_09082006.htm)
+  2004: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01272004.htm  (https://www.bls.gov/news.release/archives/tenure_01272004.htm)
+  2002: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09262002.htm  (https://www.bls.gov/news.release/archives/tenure_09262002.htm)
+  2000: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_08292000.htm  (https://www.bls.gov/news.release/archives/tenure_08292000.htm)
+  1998: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09241998.htm  (https://www.bls.gov/news.release/archives/tenure_09241998.htm)
+  1996: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_08291996.htm  (https://www.bls.gov/news.release/archives/tenure_08291996.htm)
+  1991: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01291991.htm  (https://www.bls.gov/news.release/archives/tenure_01291991.htm)
+  1987: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01291987.htm  (https://www.bls.gov/news.release/archives/tenure_01291987.htm)
+  1983: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01251983.htm  (https://www.bls.gov/news.release/archives/tenure_01251983.htm)
+
+--- Fetching tenure supplement data ---
+  2024: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/tenure.t01.htm  (https://www.bls.gov/news.release/tenure.t01.htm)
+  2022: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09262024.htm  (https://www.bls.gov/news.release/archives/tenure_09262024.htm)
+  2020: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09222020.htm  (https://www.bls.gov/news.release/archives/tenure_09222020.htm)
+  2018: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09202018.htm  (https://www.bls.gov/news.release/archives/tenure_09202018.htm)
+  2016: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09222016.htm  (https://www.bls.gov/news.release/archives/tenure_09222016.htm)
+  2014: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09182014.htm  (https://www.bls.gov/news.release/archives/tenure_09182014.htm)
+  2012: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09182012.htm  (https://www.bls.gov/news.release/archives/tenure_09182012.htm)
+  2010: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09142010.htm  (https://www.bls.gov/news.release/archives/tenure_09142010.htm)
+  2008: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09262008.htm  (https://www.bls.gov/news.release/archives/tenure_09262008.htm)
+  2006: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09082006.htm  (https://www.bls.gov/news.release/archives/tenure_09082006.htm)
+  2004: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01272004.htm  (https://www.bls.gov/news.release/archives/tenure_01272004.htm)
+  2002: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09262002.htm  (https://www.bls.gov/news.release/archives/tenure_09262002.htm)
+  2000: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_08292000.htm  (https://www.bls.gov/news.release/archives/tenure_08292000.htm)
+  1998: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_09241998.htm  (https://www.bls.gov/news.release/archives/tenure_09241998.htm)
+  1996: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_08291996.htm  (https://www.bls.gov/news.release/archives/tenure_08291996.htm)
+  1991: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01291991.htm  (https://www.bls.gov/news.release/archives/tenure_01291991.htm)
+  1987: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01291987.htm  (https://www.bls.gov/news.release/archives/tenure_01291987.htm)
+  1983: FETCH FAILED — 403 Client Error: Forbidden for url: https://www.bls.gov/news.release/archives/tenure_01251983.htm  (https://www.bls.gov/news.release/archives/tenure_01251983.htm)
+  All tenure URLs returned 403 (BLS blocks automated scraping).
+  Using hardcoded BLS published tenure values instead.
+  Saved 18 tenure observations → data/raw/tenure_raw.csv
+
+============================================================
+FRED fetch started at 2026-04-02T16:40:00.045364
+API key present: True
+============================================================
+
+--- michigan_sentiment (UMCSENT) ---
+  880 observations, 1952-11-01 to 2026-02-01 → data/raw/michigan_sentiment_fred.csv
+--- conference_board (CSCICP03USM665S) ---
+  685 observations, 1967-01-01 to 2024-01-01 → data/raw/conference_board_fred.csv
+--- u6 (U6RATE) ---
+  386 observations, 1994-01-01 to 2026-02-01 → data/raw/u6_fred.csv
+--- savings_rate (PSAVERT) ---
+  805 observations, 1959-01-01 to 2026-01-01 → data/raw/savings_rate_fred.csv
+--- real_gdp_growth (A191RL1A225NBEA) ---
+  96 observations, 1930-01-01 to 2025-01-01 → data/raw/real_gdp_growth_fred.csv
+--- median_hh_income (MEHOINUSA672N) ---
+  41 observations, 1984-01-01 to 2024-01-01 → data/raw/median_hh_income_fred.csv
+--- unrate (UNRATE) ---
+  938 observations, 1948-01-01 to 2026-02-01 → data/raw/unrate_fred.csv
+
+FRED fetch completed at 2026-04-02T16:40:01.638550

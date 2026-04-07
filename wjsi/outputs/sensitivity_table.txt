@@ -1,0 +1,9 @@
+Scheme                                2001   2005   2009   2019   2020   2022 latest  r_vs_base
+-----------------------------------------------------------------------------------------------
+Equal weight (baseline)               89.8  100.0   83.2   98.4   51.7   99.1    nan     1.0000
+Union-heavy                          100.7  100.0   70.8   97.1   47.7  108.9    nan     0.7589
+JOLTS-focused                         96.6  100.0   70.2  103.3   44.2  110.9    nan     0.8033
+No-openings                           96.7  100.0   58.0  114.4   46.6  143.5    nan     0.6020
+Structural-only (no JOLTS)            90.5  100.0  110.2   76.4   81.0   71.0    nan     0.2741
+
+Weighting choice is material — investigate further.

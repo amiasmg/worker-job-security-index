@@ -1,0 +1,26 @@
+# Environment / secrets
+.env
+*.env
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+
+# Temp / Office lock files
+~$*
+
+# Build output
+viz/dist/
+viz/node_modules/
+
+# Large generated images (can be reproduced by running scripts)
+# Keep CSV outputs and charts in outputs/ for reproducibility
