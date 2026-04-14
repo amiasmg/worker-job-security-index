@@ -57,6 +57,11 @@ FRED_SERIES = {
         "description": "U-3 unemployment rate (SA)",
         "start": "1948-01-01",
     },
+    "nonfarm_labor_share": {
+        "id": "PRS85006173",
+        "description": "Nonfarm business sector: Labor share (index, 2012=100). Quarterly.",
+        "start": "1947-01-01",
+    },
 }
 
 

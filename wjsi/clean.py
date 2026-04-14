@@ -130,7 +130,35 @@ def clean_tenure():
 
 
 # ---------------------------------------------------------------------------
-# 3.5  JOLTS monthly (for wjsi_monthly.csv output)
+# 3.5  Nonfarm Business Labor Share (quarterly → annual average)
+# ---------------------------------------------------------------------------
+def clean_labor_share():
+    """
+    PRS85006173: BLS nonfarm business sector labor share, index 2012=100.
+    Released quarterly. Annualise by averaging the four quarters.
+    Higher labor share = workers capturing more of output = more secure → positive direction.
+    Reference: Minneapolis Fed WP 800, 'Perspectives on the Labor Share' (2024).
+    """
+    p = RAW / "nonfarm_labor_share_fred.csv"
+    if not p.exists():
+        print("WARNING: nonfarm_labor_share_fred.csv not found — skipping.")
+        return pd.DataFrame(columns=["year", "labor_share", "covid_flag"])
+
+    df = pd.read_csv(p)
+    df["date"] = pd.to_datetime(df["date"])
+    df["value"] = pd.to_numeric(df["value"], errors="coerce")
+    df["year"] = df["date"].dt.year
+    ann = df.groupby("year")["value"].mean().reset_index()
+    ann.columns = ["year", "labor_share"]
+    ann = ann.dropna(subset=["labor_share"]).sort_values("year").reset_index(drop=True)
+    ann = add_covid_flag(ann)
+    ann.to_csv(CLEAN / "labor_share_annual.csv", index=False)
+    print(f"labor_share:  {len(ann)} annual obs, {ann.year.min()}–{ann.year.max()}")
+    return ann
+
+
+# ---------------------------------------------------------------------------
+# 3.6  JOLTS monthly (for wjsi_monthly.csv output)
 # ---------------------------------------------------------------------------
 def build_monthly_output():
     pt_m = load_bls_monthly("pt_econ_raw.csv")
@@ -159,9 +187,9 @@ def build_monthly_output():
 
 
 # ---------------------------------------------------------------------------
-# 3.6  Master clean dataset
+# 3.7  Master clean dataset
 # ---------------------------------------------------------------------------
-def build_master(pt_df, union_df, jolts_df, tenure_df):
+def build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df):
     df = pt_df[["year", "pt_econ_rate"]].merge(
         union_df[["year", "union_rate"]], on="year", how="outer"
     ).merge(
@@ -170,6 +198,8 @@ def build_master(pt_df, union_df, jolts_df, tenure_df):
         tenure_df[["year", "median_tenure", "interpolated"]].rename(
             columns={"interpolated": "tenure_interpolated"}
         ), on="year", how="outer"
+    ).merge(
+        labor_share_df[["year", "labor_share"]], on="year", how="outer"
     ).sort_values("year").reset_index(drop=True)
 
     df["covid_flag"] = df["year"].isin(COVID_YEARS)
@@ -181,7 +211,7 @@ def build_master(pt_df, union_df, jolts_df, tenure_df):
     print("DATA QUALITY SUMMARY")
     print("="*70)
     cols = ["pt_econ_rate", "union_rate", "openings_rate", "quits_rate",
-            "layoffs_rate", "median_tenure"]
+            "layoffs_rate", "median_tenure", "labor_share"]
     summary_rows = []
     for col in cols:
         if col not in df.columns:
@@ -210,11 +240,12 @@ if __name__ == "__main__":
     union_df = clean_union()
     jolts_df = clean_jolts()
     tenure_df = clean_tenure()
+    labor_share_df = clean_labor_share()
 
     print("\nBuilding monthly output...")
     build_monthly_output()
 
     print("\nBuilding master clean dataset...")
-    master = build_master(pt_df, union_df, jolts_df, tenure_df)
+    master = build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df)
 
     print("Done. Check data/clean/ for outputs.")

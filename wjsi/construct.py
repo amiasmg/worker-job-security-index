@@ -27,12 +27,12 @@ RECESSIONS = [
     (2020.08, 2020.25),   # Feb 2020 – Apr 2020
 ]
 
-# Primary 5-component index: pt_econ excluded — it overlaps structurally with U-6
-# (U-6 literally contains involuntary part-time workers as a subcomponent),
-# producing r=0.81 with U-6 that drops to r=0.15 without pt_econ.
-# The 5-component version is the headline WJSI. pt_econ is retained as a reference variant.
-COMPONENTS_FULL = ["union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z"]
-COMPONENTS_WITH_PT = ["pt_econ_z", "union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z"]
+# Primary 6-component index: pt_econ excluded (r=0.81 with U-6, drops to 0.15 without).
+# Labor share added (PRS85006173): nonfarm business labor share index, 2012=100.
+# Reduces JOLTS weight from 3/5 (60%) to 3/6 (50%); adds macro income distribution signal.
+# Reference: Minneapolis Fed WP 800 "Perspectives on the Labor Share" (2024).
+COMPONENTS_FULL = ["union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z", "labor_share_z"]
+COMPONENTS_WITH_PT = ["pt_econ_z", "union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z", "labor_share_z"]
 COMPONENTS_LEGACY = ["union_z", "tenure_z"]  # pre-JOLTS: union + tenure only
 
 plt.rcParams.update({
@@ -58,6 +58,7 @@ def load_components() -> pd.DataFrame:
     union = pd.read_csv(CLEAN / "union_rate.csv")
     jolts = pd.read_csv(CLEAN / "jolts_annual.csv")
     tenure = pd.read_csv(CLEAN / "tenure_annual.csv")
+    labor_share = pd.read_csv(CLEAN / "labor_share_annual.csv")[["year", "labor_share"]]
 
     df = pt[["year", "pt_econ_rate"]].merge(
         union[["year", "union_rate"]], on="year", how="outer"
@@ -65,6 +66,8 @@ def load_components() -> pd.DataFrame:
         jolts[["year", "openings_rate", "quits_rate", "layoffs_rate"]], on="year", how="outer"
     ).merge(
         tenure[["year", "median_tenure"]], on="year", how="outer"
+    ).merge(
+        labor_share, on="year", how="outer"
     ).sort_values("year").reset_index(drop=True)
 
     df["covid_flag"] = df["year"].isin([2020, 2021])
@@ -83,6 +86,7 @@ def zscore(df: pd.DataFrame) -> pd.DataFrame:
         "quits_rate": "quits_z",
         "layoffs_rate": "layoffs_z",
         "median_tenure": "tenure_z",
+        "labor_share": "labor_share_z",
     }
     for raw_col, z_col in mapping.items():
         if raw_col in df.columns:
