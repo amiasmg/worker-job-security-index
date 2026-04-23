@@ -100,11 +100,11 @@ def build_variant_a():
     base_val = df.loc[base_mask, "composite"].values[0]
     df["wjsi_ex_openings"] = shift_and_index(df["composite"], base_val)
 
-    # Also load headline 5-component for comparison
+    # Also load headline 6-component for comparison
     headline = pd.read_csv(OUT / "wjsi_annual.csv")[["year","wjsi"]]
     df = df.merge(headline, on="year", how="left")
 
-    print(f"\n{'year':>6}  {'4-comp (ex open)':>18}  {'5-comp headline':>16}  {'diff':>6}")
+    print(f"\n{'year':>6}  {'4-comp (ex open)':>18}  {'6-comp headline':>16}  {'diff':>6}")
     print("-"*52)
     for _, r in df.iterrows():
         diff = r["wjsi_ex_openings"] - r["wjsi"] if not np.isnan(r["wjsi"]) else float("nan")
@@ -189,7 +189,7 @@ def chart_variant_a(df_a):
     ax.plot(df_a["year"], df_a["wjsi_ex_openings"],
             color="#1B4F8A", lw=2.2, marker="o", ms=4, label="4-comp ex openings (union + quits + layoffs + tenure)")
     ax.plot(df_a["year"], df_a["wjsi"],
-            color="#C0392B", lw=1.6, ls="--", marker="s", ms=3.5, label="5-comp headline (includes openings)")
+            color="#C0392B", lw=1.6, ls="--", marker="s", ms=3.5, label="6-comp headline (includes openings + labor share)")
     ax.axhline(100, color="black", lw=0.8, ls=":", alpha=0.5, label=f"Base = {BASE_YEAR}")
     ax.set_title("Variant A: Annual Index ex Job Openings vs. Headline WJSI", fontweight="bold", fontsize=11)
     ax.set_ylabel(f"Index ({BASE_YEAR} = 100)")
@@ -203,7 +203,7 @@ def chart_variant_a(df_a):
     ax.bar(df_a["year"], diff, color=colors, alpha=0.75, width=0.7)
     ax.axhline(0, color="black", lw=0.8)
     shade_recessions(ax)
-    ax.set_title("Difference: 4-comp (ex openings) minus 5-comp headline  (positive = openings was dragging index down)", fontsize=10)
+    ax.set_title("Difference: 4-comp (ex openings) minus 6-comp headline  (positive = openings was dragging index down)", fontsize=10)
     ax.set_ylabel("Index point difference")
     ax.set_xlabel("Year")
     ax.set_xlim(df_a["year"].min()-0.5, df_a["year"].max()+0.5)
@@ -280,7 +280,7 @@ def chart_annual_comparison(df_a, df_b):
     shade_recessions(ax)
 
     ax.plot(merged["year"], merged["wjsi"],
-            color="#C0392B", lw=1.8, ls="--", marker="s", ms=3.5, label="5-comp headline (union+openings+quits+layoffs+tenure)")
+            color="#C0392B", lw=1.8, ls="--", marker="s", ms=3.5, label="6-comp headline (union+openings+quits+layoffs+tenure+labor_share)")
     ax.plot(merged["year"], merged["wjsi_ex_openings"],
             color="#1B4F8A", lw=2.2, marker="o", ms=4, label="4-comp ex openings (union+quits+layoffs+tenure)")
     ax.plot(merged["year"], merged["jolts_mci_ann"],
@@ -339,7 +339,7 @@ def correlation_summary(df_a, df_b):
     print(f"\n{'Indicator':<28} {'vs U-3':>8} {'vs U-6':>8} {'vs Sent.':>10}")
     print("-"*58)
     for col, label in [
-        ("wjsi",          "5-comp headline"),
+        ("wjsi",          "6-comp headline"),
         ("wjsi_ex_openings", "4-comp ex openings"),
         ("jolts_mci_ann", "JOLTS-MCI (ann)"),
     ]:

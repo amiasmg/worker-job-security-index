@@ -6,33 +6,33 @@ WJSI CORRELATION ANALYSIS
 
 Indicator                                    Period    n        r        p  Interpretation
 ------------------------------------------------------------------------------------------
-Michigan Consumer Sentiment               2001–2025   25   0.1505   0.4727  Weak — captures something different
-Conference Board Consumer Confidence       2001–2024   24   0.1425   0.5066  Weak — captures something different
-U-6 Underemployment Rate                  2001–2025   25  -0.1529   0.4657  Weak — captures something different
-Personal Saving Rate                      2001–2025   25  -0.5835   0.0022  Weak — captures something different
-Real GDP Growth Rate                      2001–2025   25   0.6556   0.0004  Meaningful — not redundant
-Real Median Household Income              2001–2024   24  -0.3213   0.1258  Weak — captures something different
+Michigan Consumer Sentiment               2001–2025   25   0.4120   0.0407  Weak — captures something different
+Conference Board Consumer Confidence       2001–2024   24   0.3349   0.1097  Weak — captures something different
+U-6 Underemployment Rate                  2001–2025   25  -0.1671   0.4246  Weak — captures something different
+Personal Saving Rate                      2001–2025   25  -0.6144   0.0011  Meaningful — not redundant
+Real GDP Growth Rate                      2001–2025   25   0.4671   0.0186  Weak — captures something different
+Real Median Household Income              2001–2024   24  -0.5604   0.0044  Weak — captures something different
 
 --- 7.3 Lead/Lag Analysis: WJSI vs. Michigan Consumer Sentiment ---
 
   Lag        r        p  Note
 ----------------------------------------
-   -4   0.1512   0.5130  ← WJSI leads
-   -3   0.2517   0.2586  ← WJSI leads
-   -2   0.4456   0.0331  ← WJSI leads
-   -1   0.1824   0.3936  ← WJSI leads
-    0   0.1505   0.4727  ← contemporaneous
-    1  -0.0350   0.8711  ← sentiment leads
-    2  -0.1952   0.3722  ← sentiment leads
-    3  -0.2805   0.2060  ← sentiment leads
-    4  -0.3324   0.1410  ← sentiment leads
+   -4   0.0770   0.7402  ← WJSI leads
+   -3   0.2851   0.1985  ← WJSI leads
+   -2   0.5015   0.0148  ← WJSI leads
+   -1   0.3298   0.1155  ← WJSI leads
+    0   0.4120   0.0407  ← contemporaneous
+    1   0.2637   0.2131  ← sentiment leads
+    2   0.1335   0.5436  ← sentiment leads
+    3  -0.0002   0.9994  ← sentiment leads
+    4  -0.1778   0.4406  ← sentiment leads
 
-Best lag: -2 (r = 0.4456)
+Best lag: -2 (r = 0.5015)
 
 *** WJSI leads consumer sentiment by 2 year(s). This is the key finding — publish. ***
 
 --- Overall Assessment ---
-WJSI correlation with U-6 = 0.153 < 0.90 — not redundant with U-6.
+WJSI correlation with U-6 = 0.167 < 0.90 — not redundant with U-6.
 
 ASSESSMENT: Revisit index design — weak consumer confidence correlation
 ===========================================================================

@@ -27,12 +27,21 @@ RECESSIONS = [
     (2020.08, 2020.25),   # Feb 2020 – Apr 2020
 ]
 
-# Primary 6-component index: pt_econ excluded (r=0.81 with U-6, drops to 0.15 without).
-# Labor share added (PRS85006173): nonfarm business labor share index, 2012=100.
-# Reduces JOLTS weight from 3/5 (60%) to 3/6 (50%); adds macro income distribution signal.
-# Reference: Minneapolis Fed WP 800 "Perspectives on the Labor Share" (2024).
-COMPONENTS_FULL = ["union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z", "labor_share_z"]
-COMPONENTS_WITH_PT = ["pt_econ_z", "union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z", "labor_share_z"]
+# Primary 6-component index.
+# Excluded: pt_econ (r=0.81 overlap with U-6).
+# Tested and rejected:
+#   temp_help_share — coincident indicator (peak r at lag 0); adds no leading signal
+#   unemp_duration  — lagging indicator (peaks 6-18mo post-recession); drags composite backward
+#   prod_pay_ratio  — r=-0.975 with labor share; redundant
+#   E2E transitions — r=+0.734 with labor share; partially redundant, short history
+# JOLTS weight: 3/6 = 50% (down from 3/5 = 60% in original 5-comp version).
+# New vs. original 5-comp: labor_share added (PRS85006173).
+COMPONENTS_FULL = [
+    "union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z", "labor_share_z",
+]
+COMPONENTS_WITH_PT = [
+    "pt_econ_z", "union_z", "openings_z", "quits_z", "layoffs_z", "tenure_z", "labor_share_z",
+]
 COMPONENTS_LEGACY = ["union_z", "tenure_z"]  # pre-JOLTS: union + tenure only
 
 plt.rcParams.update({
@@ -59,6 +68,8 @@ def load_components() -> pd.DataFrame:
     jolts = pd.read_csv(CLEAN / "jolts_annual.csv")
     tenure = pd.read_csv(CLEAN / "tenure_annual.csv")
     labor_share = pd.read_csv(CLEAN / "labor_share_annual.csv")[["year", "labor_share"]]
+    temp_help   = pd.read_csv(CLEAN / "temp_help_share_annual.csv")[["year", "temp_help_share"]]
+    unemp_dur   = pd.read_csv(CLEAN / "unemp_duration_annual.csv")[["year", "unemp_duration_weeks"]]
 
     df = pt[["year", "pt_econ_rate"]].merge(
         union[["year", "union_rate"]], on="year", how="outer"
@@ -68,6 +79,10 @@ def load_components() -> pd.DataFrame:
         tenure[["year", "median_tenure"]], on="year", how="outer"
     ).merge(
         labor_share, on="year", how="outer"
+    ).merge(
+        temp_help, on="year", how="outer"
+    ).merge(
+        unemp_dur, on="year", how="outer"
     ).sort_values("year").reset_index(drop=True)
 
     df["covid_flag"] = df["year"].isin([2020, 2021])
@@ -87,6 +102,8 @@ def zscore(df: pd.DataFrame) -> pd.DataFrame:
         "layoffs_rate": "layoffs_z",
         "median_tenure": "tenure_z",
         "labor_share": "labor_share_z",
+        "temp_help_share": "temp_help_z",
+        "unemp_duration_weeks": "unemp_duration_z",
     }
     for raw_col, z_col in mapping.items():
         if raw_col in df.columns:
@@ -111,6 +128,12 @@ def align_direction(df: pd.DataFrame) -> pd.DataFrame:
     # NOTE: This is tested in backtest.py with openings as positive and excluded.
     if "openings_z" in df.columns:
         df["openings_z"] = df["openings_z"] * -1
+    # More temp help = less secure → flip
+    if "temp_help_z" in df.columns:
+        df["temp_help_z"] = df["temp_help_z"] * -1
+    # Longer unemployment duration = less secure → flip
+    if "unemp_duration_z" in df.columns:
+        df["unemp_duration_z"] = df["unemp_duration_z"] * -1
     return df
 
 
@@ -123,10 +146,10 @@ def build_full_index(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     full = df[df["year"] >= 2001].copy()
     full = full.dropna(subset=["union_z", "openings_z", "quits_z", "layoffs_z"])
 
-    # Primary 5-component composite (ex pt_econ)
+    # Primary 6-component composite (ex pt_econ)
     full["composite_equal"] = full[COMPONENTS_FULL].mean(axis=1)
 
-    # Reference 6-component composite (with pt_econ) — saved for comparison
+    # Reference 7-component composite (with pt_econ) — saved for comparison
     full["composite_with_pt"] = full[COMPONENTS_WITH_PT].mean(axis=1)
 
     # Shift composite to a positive range before ratio indexing.
@@ -164,15 +187,15 @@ def build_full_index(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     base_val = full.loc[full["year"] == BASE_YEAR, "composite_shifted"].values[0]
     full["wjsi"] = (full["composite_shifted"] / base_val) * 100
 
-    # Also index the 6-component (with pt_econ) variant for reference
+    # Also index the 7-component (with pt_econ) variant for reference
     shift_pt = -full["composite_with_pt"].min() + 1.0
     full["composite_with_pt_s"] = full["composite_with_pt"] + shift_pt
     base_val_pt = full.loc[full["year"] == BASE_YEAR, "composite_with_pt_s"].values[0]
     full["wjsi_with_pt"] = (full["composite_with_pt_s"] / base_val_pt) * 100
 
-    print(f"\n✓ Chosen base year: {BASE_YEAR} (primary 5-component index, ex pt_econ)")
+    print(f"\n✓ Chosen base year: {BASE_YEAR} (primary 6-component index, ex pt_econ)")
     print(f"  Rationale: pt_econ excluded — structural overlap with U-6 (r drops 0.81→0.15 without it).")
-    print(f"\n{'year':>6} {'wjsi (5-comp)':>14} {'wjsi (w/pt)':>12}")
+    print(f"\n{'year':>6} {'wjsi (6-comp)':>14} {'wjsi (w/pt)':>12}")
     for _, row in full[["year", "wjsi", "wjsi_with_pt"]].iterrows():
         print(f"{int(row.year):>6} {row.wjsi:>14.1f} {row.wjsi_with_pt:>12.1f}")
 
@@ -222,12 +245,12 @@ def build_legacy_index(df: pd.DataFrame, base_year: int) -> pd.DataFrame:
 def save_outputs(full_df, legacy_df, base_year):
     Path("outputs").mkdir(parents=True, exist_ok=True)
 
-    # Annual WJSI — primary (5-component, ex pt_econ) + reference variant (with pt_econ)
+    # Annual WJSI — primary (6-component, ex pt_econ) + reference variant (with pt_econ)
     cols = ["year", "wjsi", "wjsi_with_pt", "composite_equal"] + COMPONENTS_FULL + ["covid_flag"]
     full_df[[c for c in cols if c in full_df.columns]].to_csv(OUT / "wjsi_annual.csv", index=False)
     print(f"\nSaved outputs/wjsi_annual.csv ({len(full_df)} rows)")
-    print(f"  Primary index: 5-component (ex pt_econ) → 'wjsi' column")
-    print(f"  Reference:     6-component (with pt_econ) → 'wjsi_with_pt' column")
+    print(f"  Primary index: 6-component (ex pt_econ) → 'wjsi' column")
+    print(f"  Reference:     7-component (with pt_econ) → 'wjsi_with_pt' column")
 
     # Legacy
     if not legacy_df.empty:
@@ -314,6 +337,7 @@ def chart3_components(full_df):
         "quits_z": "Quits rate",
         "layoffs_z": "Layoffs rate (inverted)",
         "tenure_z": "Median tenure",
+        "labor_share_z": "Nonfarm business labor share (PRS85006173)",
     }
     n = len(z_cols)
     fig, axes = plt.subplots(n, 1, figsize=(11, 2.2 * n), sharex=True)

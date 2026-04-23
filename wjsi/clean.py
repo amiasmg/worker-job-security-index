@@ -130,7 +130,80 @@ def clean_tenure():
 
 
 # ---------------------------------------------------------------------------
-# 3.5  Nonfarm Business Labor Share (quarterly → annual average)
+# 3.5  Temporary help employment share
+# ---------------------------------------------------------------------------
+def clean_temp_help():
+    """
+    Temporary help services employment as % of total nonfarm payrolls.
+    Source: BLS CES via FRED (TEMPHELPS / PAYEMS).
+    Higher temp share = more precarious employment structure → inverted in index.
+    Data: 1990–present, monthly → annual average.
+    """
+    th_path  = RAW / "temp_help_employment_fred.csv"
+    tot_path = RAW / "total_nonfarm_payrolls_fred.csv"
+
+    if not th_path.exists() or not tot_path.exists():
+        # Fall back to pre-computed file if individual series missing
+        pre = RAW / "temp_help_share_fred.csv"
+        if pre.exists():
+            df = pd.read_csv(pre)
+            df["date"] = pd.to_datetime(df["date"] if "date" in df.columns else df.index)
+            df = df.rename(columns={df.columns[-1]: "temp_help_share"})
+        else:
+            print("WARNING: temp help data not found — skipping.")
+            return pd.DataFrame(columns=["year", "temp_help_share", "covid_flag"])
+    else:
+        th  = pd.read_csv(th_path);  th["date"]  = pd.to_datetime(th["date"])
+        tot = pd.read_csv(tot_path); tot["date"] = pd.to_datetime(tot["date"])
+        th["year"]  = th["date"].dt.year
+        tot["year"] = tot["date"].dt.year
+        th_ann  = th.groupby("year")["value"].mean().reset_index()
+        tot_ann = tot.groupby("year")["value"].mean().reset_index()
+        df = th_ann.merge(tot_ann, on="year", suffixes=("_th","_tot"))
+        df["temp_help_share"] = df["value_th"] / df["value_tot"] * 100
+        df = df[["year","temp_help_share"]]
+
+    df = df.dropna(subset=["temp_help_share"]).sort_values("year").reset_index(drop=True)
+    df = add_covid_flag(df)
+    df.to_csv(CLEAN / "temp_help_share_annual.csv", index=False)
+    print(f"temp_help:    {len(df)} annual obs, {df.year.min()}–{df.year.max()}")
+    return df
+
+
+# ---------------------------------------------------------------------------
+# 3.6  Mean unemployment duration
+# ---------------------------------------------------------------------------
+def clean_unemp_duration():
+    """
+    Mean duration of unemployment (weeks). FRED: UEMPMEAN.
+    Captures depth of unemployment risk — orthogonal to the unemployment rate.
+    High duration = structural/scarring unemployment, not just cyclical.
+    Direction: higher duration = less secure → inverted in index.
+    Data: 1948–present, monthly → annual average.
+    """
+    p = RAW / "unemp_duration_fred.csv"
+    if not p.exists():
+        print("WARNING: unemp_duration_fred.csv not found — skipping.")
+        return pd.DataFrame(columns=["year","unemp_duration_weeks","covid_flag"])
+
+    df = pd.read_csv(p)
+    # Handle both FRED-format (date, value) and pre-processed (year, unemp_duration_weeks)
+    if "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"])
+        df["year"] = df["date"].dt.year
+        ann = df.groupby("year")["value"].mean().reset_index()
+        ann.columns = ["year", "unemp_duration_weeks"]
+    else:
+        ann = df[["year", "unemp_duration_weeks"]].copy()
+    ann = ann.dropna().sort_values("year").reset_index(drop=True)
+    ann = add_covid_flag(ann)
+    ann.to_csv(CLEAN / "unemp_duration_annual.csv", index=False)
+    print(f"unemp_dur:    {len(ann)} annual obs, {ann.year.min()}–{ann.year.max()}")
+    return ann
+
+
+# ---------------------------------------------------------------------------
+# 3.7  Nonfarm Business Labor Share (quarterly → annual average)
 # ---------------------------------------------------------------------------
 def clean_labor_share():
     """
@@ -187,9 +260,9 @@ def build_monthly_output():
 
 
 # ---------------------------------------------------------------------------
-# 3.7  Master clean dataset
+# 3.8  Master clean dataset
 # ---------------------------------------------------------------------------
-def build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df):
+def build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df, temp_help_df, unemp_dur_df):
     df = pt_df[["year", "pt_econ_rate"]].merge(
         union_df[["year", "union_rate"]], on="year", how="outer"
     ).merge(
@@ -200,8 +273,14 @@ def build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df):
         ), on="year", how="outer"
     ).merge(
         labor_share_df[["year", "labor_share"]], on="year", how="outer"
+    ).merge(
+        temp_help_df[["year", "temp_help_share"]], on="year", how="outer"
+    ).merge(
+        unemp_dur_df[["year", "unemp_duration_weeks"]], on="year", how="outer"
     ).sort_values("year").reset_index(drop=True)
 
+    # Drop any duplicate columns created by multi-join (keep first occurrence)
+    df = df.loc[:, ~df.columns.duplicated()]
     df["covid_flag"] = df["year"].isin(COVID_YEARS)
 
     df.to_csv(CLEAN / "wjsi_components.csv", index=False)
@@ -211,21 +290,24 @@ def build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df):
     print("DATA QUALITY SUMMARY")
     print("="*70)
     cols = ["pt_econ_rate", "union_rate", "openings_rate", "quits_rate",
-            "layoffs_rate", "median_tenure", "labor_share"]
+            "layoffs_rate", "median_tenure", "labor_share", "temp_help_share", "unemp_duration_weeks"]
     summary_rows = []
     for col in cols:
         if col not in df.columns:
             continue
-        s = df[col].dropna()
+        sub = df[["year", col]].dropna()
+        if sub.empty:
+            continue
+        v = sub[col]
         summary_rows.append({
             "series": col,
-            "n": len(s),
-            "first_year": int(df.loc[df[col].notna(), "year"].min()),
-            "last_year": int(df.loc[df[col].notna(), "year"].max()),
-            "mean": round(s.mean(), 3),
-            "std": round(s.std(), 3),
-            "min": round(s.min(), 3),
-            "max": round(s.max(), 3),
+            "n": len(v),
+            "first_year": int(sub["year"].min()),
+            "last_year":  int(sub["year"].max()),
+            "mean": round(float(v.mean()), 3),
+            "std":  round(float(v.std()),  3),
+            "min":  round(float(v.min()),  3),
+            "max":  round(float(v.max()),  3),
         })
 
     summary_df = pd.DataFrame(summary_rows)
@@ -241,11 +323,13 @@ if __name__ == "__main__":
     jolts_df = clean_jolts()
     tenure_df = clean_tenure()
     labor_share_df = clean_labor_share()
+    temp_help_df   = clean_temp_help()
+    unemp_dur_df   = clean_unemp_duration()
 
     print("\nBuilding monthly output...")
     build_monthly_output()
 
     print("\nBuilding master clean dataset...")
-    master = build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df)
+    master = build_master(pt_df, union_df, jolts_df, tenure_df, labor_share_df, temp_help_df, unemp_dur_df)
 
     print("Done. Check data/clean/ for outputs.")

@@ -62,6 +62,21 @@ FRED_SERIES = {
         "description": "Nonfarm business sector: Labor share (index, 2012=100). Quarterly.",
         "start": "1947-01-01",
     },
+    "temp_help_employment": {
+        "id": "TEMPHELPS",
+        "description": "Temporary help services employment, SA (thousands). Used to compute temp_help_share.",
+        "start": "1990-01-01",
+    },
+    "total_nonfarm_payrolls": {
+        "id": "PAYEMS",
+        "description": "Total nonfarm payrolls, SA (thousands). Denominator for temp_help_share.",
+        "start": "1939-01-01",
+    },
+    "unemp_duration": {
+        "id": "UEMPMEAN",
+        "description": "Mean duration of unemployment (weeks). Captures depth of job loss risk, not rate.",
+        "start": "1948-01-01",
+    },
 }
 
 
