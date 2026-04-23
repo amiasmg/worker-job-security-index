@@ -12,12 +12,13 @@ import sys
 from pathlib import Path
 
 STEPS = [
-    ("fetch_bls.py", "Fetching BLS series and tenure data"),
-    ("fetch_fred.py", "Fetching FRED series"),
-    ("clean.py", "Cleaning and normalizing components"),
-    ("construct.py", "Constructing index and charts"),
-    ("backtest.py", "Running sensitivity analysis"),
-    ("correlations.py", "Running correlation analysis"),
+    ("fetch_bls.py",          "Fetching BLS series and tenure data"),
+    ("fetch_fred.py",         "Fetching FRED series"),
+    ("clean.py",              "Cleaning and normalizing components"),
+    ("construct.py",          "Constructing annual index and charts"),
+    ("construct_quarterly.py","Constructing quarterly index and charts"),
+    ("backtest.py",           "Running sensitivity analysis"),
+    ("correlations.py",       "Running correlation analysis"),
 ]
 
 
