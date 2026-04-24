@@ -2,8 +2,6 @@
 
 A composite annual index measuring **structural job security** for American workers — independent of headline unemployment statistics.
 
-Built in collaboration with [LISEP](https://lisep.org) (Ludwig Institute for Shared Economic Prosperity).
-
 ---
 
 ## The Problem
